@@ -1,9 +1,9 @@
 import { useFirebase } from '../context/Firebase';
 
 const Upload = () => {
-    const { putData } = useFirebase();
+    const { putData, uploadFile } = useFirebase();
     
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const name = e.target.name.value; 
         const file = e.target.file.files[0]; 
@@ -14,8 +14,18 @@ const Upload = () => {
             return;
         }
 
-        // Assuming you will replace the URL_TO_UPLOADED_FILE with the actual file URL
-        putData(`users/${name}`, { resume: 'URL_TO_UPLOADED_FILE', uploadTime: new Date().toISOString() });
+        try {
+            // Wait for the file to be uploaded and get the URL
+            let url = await uploadFile(file); 
+
+            // Store the file URL in the database with the user's name and the upload time
+            putData(`users/${name}`, { resume: url, uploadTime: new Date().toISOString() });
+
+            alert("File uploaded successfully!");
+        } catch (error) {
+            console.error("Error uploading file:", error);
+            alert("Failed to upload file. Please try again.");
+        }
     };
 
     return (
